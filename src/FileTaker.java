@@ -6,173 +6,156 @@ import java.util.*;
 import java.io.*;
 
 
-public class FileTaker {
+public class findData {
 
     /** Instance Variables **/
-    private static ArrayList<String> companyList = new ArrayList<String>();
-    private static ArrayList<String> emailMarketing = new ArrayList<String>();
-    private static ArrayList<String> contentMarketing = new ArrayList<String>();
-    private static ArrayList<String> socialMedia = new ArrayList<String>();
-    private static ArrayList<String> analytics = new ArrayList<String>();
-    private static final ArrayList<String> OTHER = new ArrayList<String>();
+    private static ArrayList<String> companyList;
+    private static ArrayList<String> emailMarketingTools;
+    private static ArrayList<String> contentMarketingTools;
+    private static ArrayList<String> socialMediaTools;
+    private static ArrayList<String> analyticsTools;
+    private static ArrayList<String> OTHER;
+    private static TreeMap<Integer, ArrayList<String>> countData;
+    private static HashMap<String, ArrayList<String>> companyTools;
 
-    //Create count mapping with tools
-    private static TreeMap<Integer, ArrayList<String>> countData = new TreeMap<Integer, ArrayList<String>>();
-
-    //Create user list mapping with tools
-    private static HashMap<String, ArrayList<String>> companyTools = new HashMap<String, ArrayList<String>>();
+    private static ArrayList<String> fullStackCompanies = new ArrayList<String>();
+    private static ArrayList<String> partialStackCompanies = new ArrayList<String>();
 
 
-    public void run() {
 
-        //Declare file directory
-        String csvFile = "/Users/nielskjer/Downloads/stacklist.csv";
+    public void findData() {
 
-        //Initialize reader objects
-        BufferedReader br1 = null;
-        BufferedReader br2 = null;
+        //Parse the file and take the data from comma separated values.
+        FileTaker takeFile = new FileTaker();
+        takeFile.run();
 
-        //Establish line separators
-        String line = "";
-        String splitVal = ",";
+        //Grab data
+        companyList = takeFile.get("list");
+        emailMarketingTools = takeFile.get("email");
+        contentMarketingTools = takeFile.get("content");
+        socialMediaTools = takeFile.get("social");
+        analyticsTools = takeFile.get("analytics");
+        OTHER = takeFile.get("other");
 
-        try {
-            //Create buffered reader objects
-            br1 = new BufferedReader(new FileReader(csvFile));
-            br2 = new BufferedReader(new FileReader(csvFile));
+        //Grab maps
+        countData = takeFile.getCountData();
+        companyTools = takeFile.getCompanyTools();
 
-            while ((line = br1.readLine()) != null) {
-                String[] inLine = line.split(splitVal);
-                String category = inLine[0];
-                String company = inLine[1];
-                String tool = inLine[5];
-                String primaryCategory = inLine[6];
-
-                //Add an empty arraylist for each company being read from file
-                companyTools.put(company, new ArrayList<String>());
-
-                //Check each tool's category and add to respective ArrayList
-                //Set counter
-                int duplicates = 0;
-
-                //Grab all companies and store in an ArrayList
-                companyList.add(company);
-
-                if (primaryCategory.equals("Email Marketing")) {
-                    //Check each item in the list for duplicates in the read data
-                    for (int i = 0; i < emailMarketing.size(); i++) {
-                        //Increment duplicate values if match is found
-                        if (emailMarketing.get(i).equals(tool)) duplicates++;
-                    }
-                    if (duplicates == 0) emailMarketing.add(tool);
-                    //Reset duplicate counter to 0
-                    duplicates = 0;
-
-                } else if (primaryCategory.equals("Content Marketing")) {
-                    for (int i = 0; i < contentMarketing.size(); i++) {
-                        if (contentMarketing.get(i).equals(tool)) duplicates++;
-                    }
-                    if (duplicates == 0) contentMarketing.add(tool);
-                    duplicates = 0;
-
-                } else if (primaryCategory.equals("Social Media Management")) {
-                    for (int i = 0; i < socialMedia.size(); i++) {
-                        if (socialMedia.get(i).equals(tool)) duplicates++;
-                    }
-                    if (duplicates == 0) socialMedia.add(tool);
-                    duplicates = 0;
-
-                } else if (primaryCategory.equals("BI / Analytics")) {
-                    for (int i = 0; i < analytics.size(); i++) {
-                        if (analytics.get(i).equals(tool)) duplicates++;
-                    }
-                    if (duplicates == 0) analytics.add(tool);
-                    duplicates = 0;
-                } else {
-                    OTHER.add(tool);
-                }
-            }
-
-            while ((line = br2.readLine()) != null) {
-                String[] inLine = line.split(splitVal);
-                String category = inLine[0];
-                String company = inLine[1];
-                String tool = inLine[5];
-                String primaryCategory = inLine[6];
-
-                //Map tools to companies
-                if (companyTools.keySet().contains(company)) {
-                    companyTools.get(company).add(tool);
-                    //companyTools.put(company, tool);
-                }
-            }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (br1 != null) {
-                try {
-                    br1.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+        //Initialize the counting TreeMap with empty ArrayLists
+        int initTemp = 0;
+        while (initTemp <= 20) {
+            countData.put(initTemp, new ArrayList<String>());
+            initTemp++;
         }
 
-        /** User output/Debugging **/
-
-//        System.out.println(companyTools.toString());
-//        System.out.println("------");
-//        System.out.println("Email marketing tools: ");
-//        System.out.println(emailMarketing);
-//        System.out.println("-------");
-//        System.out.println("Content marketing tools: ");
-//        System.out.println(contentMarketing);
-//        System.out.println("-------");
-//        System.out.println("Social media marketing tools: ");
-//        System.out.println(socialMedia);
-//        System.out.println("------");
-//        System.out.println("BI / Analytics tools: ");
-//        System.out.println(analytics);
     }
 
-    /** Helper Methods **/
+    public void findMatch() {
 
-    /** Access data with the get method.
-     *
-     *  Args: takes an email marketing category or returns the irrelevant list.
-     */
-    public ArrayList<String> get(String category) {
-        if (category.equals("email")) {
-            return emailMarketing;
-        } else if (category.equals("content")) {
-            return contentMarketing;
-        } else if (category.equals("social")) {
-            return socialMedia;
-        } else if (category.equals("analytics")) {
-            return analytics;
-        } else if (category.equals("list")) {
-            return companyList;
-        } else {
-            //System.out.println("Invalid Category: Please try again.");
-            return OTHER;
+        //Temporary ArrayList
+        ArrayList<String> tempList = new ArrayList<String>();
+
+        //Counters
+        int emailCount, contentCount, socialCount, analyticsCount, totalCount;
+        emailCount = 0; contentCount = 0; socialCount = 0; analyticsCount = 0; totalCount = 0;
+
+        //Flags
+        boolean email, content, social, analytics, isFullStack, isPartialStack;
+        email = false; content = false; social = false;
+        analytics = false; isFullStack = false; isPartialStack = false;
+
+        //check if each company in the keyset matches with primary categories
+        for (String company : companyTools.keySet()) {
+
+            //Grab each list of tools a company is using
+            tempList = companyTools.get(company);
+
+            //Clean none flag
+            if (tempList.contains("None")) tempList.remove("None");
+
+            //Iterate through each email marketing tool
+            for (int i = 0; i < emailMarketingTools.size(); i++) {
+
+                //Check if each email marketing tool is in the list for each tool
+                if (tempList.contains(emailMarketingTools.get(i))) {
+                    emailCount++;
+                    email = true;
+                }
+            }
+
+            //Iterate through each content marketing tool
+            for (int i = 0; i < contentMarketingTools.size(); i++) {
+
+                //Check if each content marketing tool is in the stack of a company
+                if (tempList.contains(contentMarketingTools.get(i))) {
+                    contentCount++;
+                    content = true;
+                }
+            }
+
+            //Iterate through each social media marketing tool
+            for (int i = 0; i < socialMediaTools.size(); i++) {
+
+                //Check if each social media marketing tool is in the stack of a company
+                if (tempList.contains(socialMediaTools.get(i))) {
+                    socialCount++;
+                    social = true;
+                }
+            }
+
+            //Iterate through each analytics tool
+            for (int i = 0; i < analyticsTools.size(); i++) {
+
+                //Check if each analytics tool is in the stack of a company
+                if (tempList.contains(analyticsTools.get(i))) {
+                    analyticsCount++;
+                    analytics = true;
+                }
+            }
+
+            //Combine each count
+            totalCount = emailCount + contentCount + socialCount + analyticsCount;
+
+            //Check if a company has a full marketing stack
+            if (email && content && social && analytics) {
+                isFullStack = true;
+            } else if (email || content || social || analytics) {
+                isPartialStack = true;
+            } else {
+                isPartialStack = false; isFullStack = false;
+            }
+
+            //Add company to tallied TreeMap
+            countData.get(totalCount).add(company);
+
+            //If a company has a full marketing stack
+            if (isFullStack) {
+               fullStackCompanies.add(company);
+            }
+
+            //If a company has a partial marketing stack
+            if (isPartialStack) {
+                partialStackCompanies.add(company);
+            }
+
+            //Reset counter and boolean values;
+            isPartialStack = false; isFullStack = false;
+            email = false; social = false; content = false; analytics = false;
+            emailCount = 0; socialCount = 0; contentCount = 0; analyticsCount = 0;
+            totalCount = 0;
         }
-    };
 
-    public TreeMap<Integer, ArrayList<String>> getCountData() {
-        return countData;
-    };
+        /** Debugging **/
+        System.out.println("Full stack companies: ");
+        System.out.println(fullStackCompanies);
 
-    public HashMap<String, ArrayList<String>> getCompanyTools() {
-        return companyTools;
-    };
+        System.out.println("[][][][][][][][][][][]");
+        System.out.println("Partial stack companies: ");
+        System.out.println(partialStackCompanies);
 
-
-
-    /**       **/
-    /** Saved Space **/
-
+        System.out.println("[][][][][][][][][][][][][]");
+        System.out.println("Count Data: ");
+        System.out.println(countData.toString());
+    }
 
 }
