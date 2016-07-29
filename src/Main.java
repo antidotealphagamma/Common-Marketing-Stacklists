@@ -4,5 +4,9 @@ public class Main {
         findData data = new findData();
         data.findData();
         data.findMatch();
+        data.sortLists();
+        data.countLengths();
+        data.getMostCommon();
     }
+
 }
