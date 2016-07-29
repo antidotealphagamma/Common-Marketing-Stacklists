@@ -15,9 +15,24 @@ public class findData {
     private static ArrayList<String> socialMediaTools;
     private static ArrayList<String> analyticsTools;
     private static ArrayList<String> OTHER;
-    private static TreeMap<Integer, ArrayList<String>> fullStackCompanies;
-    private static TreeMap<Integer, ArrayList<String>> partialStackCompanies;
+    private static TreeMap<Integer, ArrayList<String>> countData;
     private static HashMap<String, ArrayList<String>> companyTools;
+
+    private static ArrayList<String> fullStackCompanies = new ArrayList<String>();
+    private static ArrayList<String> partialStackCompanies = new ArrayList<String>();
+
+    //Storage for stack count
+    private static TreeMap<String, Integer> emailMarketingFullCount = new TreeMap<>();
+    private static TreeMap<String, Integer> contentMarketingFullCount = new TreeMap<>();
+    private static TreeMap<String, Integer> socialMediaFullCount = new TreeMap<>();
+    private static TreeMap<String, Integer> analyticsFullCount = new TreeMap<>();
+
+    //Partial Counts
+    private static TreeMap<String, Integer> emailMarketingPartialCount = new TreeMap<>();
+    private static TreeMap<String, Integer> contentMarketingPartialCount = new TreeMap<>();
+    private static TreeMap<String, Integer> socialMediaPartialCount = new TreeMap<>();
+    private static TreeMap<String, Integer> analyticsPartialCount = new TreeMap<>();
+
 
 
     public void findData() {
@@ -35,26 +50,15 @@ public class findData {
         OTHER = takeFile.get("other");
 
         //Grab maps
-        fullStackCompanies = takeFile.getCountData();
-        partialStackCompanies = takeFile.getCountData();
+        countData = takeFile.getCountData();
         companyTools = takeFile.getCompanyTools();
 
         //Initialize the counting TreeMap with empty ArrayLists
         int initTemp = 0;
         while (initTemp <= 20) {
-            fullStackCompanies.put(initTemp, new ArrayList<String>());
+            countData.put(initTemp, new ArrayList<String>());
             initTemp++;
         }
-
-        initTemp = 0;
-        while (initTemp <= 10) {
-            partialStackCompanies.put(initTemp, new ArrayList<String>());
-            initTemp++;
-        }
-
-
-
-
 
     }
 
@@ -63,7 +67,7 @@ public class findData {
         //Temporary ArrayList
         ArrayList<String> tempList = new ArrayList<String>();
 
-        //Counter
+        //Counters
         int emailCount, contentCount, socialCount, analyticsCount, totalCount;
         emailCount = 0; contentCount = 0; socialCount = 0; analyticsCount = 0; totalCount = 0;
 
@@ -124,7 +128,7 @@ public class findData {
             //Combine each count
             totalCount = emailCount + contentCount + socialCount + analyticsCount;
 
-            //Check if a company has a full marketing stacklist
+            //Check if a company has a full marketing stack
             if (email && content && social && analytics) {
                 isFullStack = true;
             } else if (email || content || social || analytics) {
@@ -133,14 +137,17 @@ public class findData {
                 isPartialStack = false; isFullStack = false;
             }
 
+            //Add company to tallied TreeMap
+            countData.get(totalCount).add(company);
+
             //If a company has a full marketing stack
             if (isFullStack) {
-               fullStackCompanies.get(totalCount).add(company);
+               fullStackCompanies.add(company);
             }
 
             //If a company has a partial marketing stack
             if (isPartialStack) {
-                partialStackCompanies.get(totalCount).add(company);
+                partialStackCompanies.add(company);
             }
 
             //Reset counter and boolean values;
@@ -148,16 +155,136 @@ public class findData {
             email = false; social = false; content = false; analytics = false;
             emailCount = 0; socialCount = 0; contentCount = 0; analyticsCount = 0;
             totalCount = 0;
-
         }
 
-        /** Debugging **/
-        System.out.println("Full stack companies: ");
-        System.out.println(fullStackCompanies);
 
-        System.out.println("[][][][][][][][][][][]");
-        System.out.println("Partial stack companies: ");
-        System.out.println(partialStackCompanies);
+
+
+
+        /** Debugging **/
+//        System.out.println("Full stack companies: ");
+//        System.out.println(fullStackCompanies);
+//
+//        System.out.println("[][][][][][][][][][][]");
+//        System.out.println("Partial stack companies: ");
+//        System.out.println(partialStackCompanies);
+//
+//        System.out.println("[][][][][][][][][][][][][]");
+//        System.out.println("Count Data: ");
+//        System.out.println(countData.toString());
+//
+//        System.out.println("Total full companies" + fullStackCompanies.size());
+
+        System.out.println(companyTools.toString());
+
     }
+
+    //Alphabetical sort
+    public ArrayList<String> mergeSort(ArrayList<String> fullList) {
+        ArrayList<String> left = new ArrayList<String>();
+        ArrayList<String> right = new ArrayList<String>();
+        int middle;
+
+        if (fullList.size() == 1) {
+            return fullList;
+        } else {
+            middle = fullList.size()/2;
+            //Left side copy
+            for (int i = 0; i < middle; i++) {
+                left.add(fullList.get(i));
+            }
+
+            //Right side copy
+            for (int i = middle; i < fullList.size(); i++) {
+                right.add(fullList.get(i));
+            }
+
+            //Sort the left and right halves of the ArrayList
+            left = mergeSort(left);
+            right = mergeSort(right);
+
+            //Merge sorted halves
+            merge(left, right, fullList);
+        }
+
+        return fullList;
+    }
+
+    //Helper method for recursive mergeSort
+    private void merge(ArrayList<String> left, ArrayList<String> right, ArrayList<String> fullList) {
+        int leftIndex = 0;
+        int rightIndex = 0;
+        int fullIndex = 0;
+
+        while (leftIndex < left.size() && rightIndex < right.size()) {
+            if ((left.get(leftIndex).compareTo(right.get(rightIndex))) < 0) {
+                fullList.set(fullIndex, left.get(leftIndex));
+                leftIndex++;
+            } else {
+                fullList.set(fullIndex, right.get(rightIndex));
+                rightIndex++;
+            }
+            fullIndex++;
+        }
+
+        ArrayList<String> temp;
+        int tempIndex;
+        if (leftIndex >= left.size()) {
+            //Left arraylist has no room
+            temp = right;
+            tempIndex = rightIndex;
+        } else {
+            //Right arrayList has no room
+            temp = left;
+            tempIndex = leftIndex;
+        }
+
+        //Copy the rest of the arraylist not used up
+        for (int i = tempIndex; i < temp.size(); i++) {
+            fullList.set(fullIndex, temp.get(i));
+            fullIndex++;
+        }
+    }
+
+    //Sort all ArrayLists in alphabetical order
+    public void sortLists() {
+        mergeSort(contentMarketingTools);
+        mergeSort(emailMarketingTools);
+        mergeSort(socialMediaTools);
+        mergeSort(analyticsTools);
+        mergeSort(partialStackCompanies);
+        mergeSort(fullStackCompanies);
+
+//        System.out.println(contentMarketingTools.toString());
+//        System.out.println(emailMarketingTools.toString());
+//        System.out.println(socialMediaTools.toString());
+//        System.out.println(analyticsTools.toString());
+//        System.out.println(partialStackCompanies.toString());
+//        System.out.println(fullStackCompanies.toString());
+
+    }
+
+    //Stores all the found data into TreeMaps
+//    public void storeCount() {
+//
+//        //Full Stack
+//        for (int i = 0; i < fullStackCompanies.size(); i++) {
+//            String company = fullStackCompanies.get(i);
+//            if (companyTools.containsKey(company)) {
+//                ArrayList<String> temp = companyTools.get(company);
+//
+//                //Iterate through each category
+//
+//            }
+//        }
+//
+//        //Partial Stack
+//    }
+
+    //Calculates the most common full marketing stacklists
+//    public void calculateFull() {
+//
+
+//    }
 
 }
