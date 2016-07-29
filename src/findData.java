@@ -2,8 +2,8 @@
  * Created by nielskjer on 7/27/16.
  */
 
+import java.lang.reflect.Array;
 import java.util.*;
-import java.io.*;
 
 
 public class findData {
@@ -18,8 +18,8 @@ public class findData {
     private static TreeMap<Integer, ArrayList<String>> countData;
     private static HashMap<String, ArrayList<String>> companyTools;
 
-    private static ArrayList<String> fullStackCompanies = new ArrayList<String>();
-    private static ArrayList<String> partialStackCompanies = new ArrayList<String>();
+    private static ArrayList<String> fullStackCompanies = new ArrayList<>();
+    private static ArrayList<String> partialStackCompanies = new ArrayList<>();
 
     //Storage for stack count
     private static TreeMap<String, Integer> emailMarketingFullCount = new TreeMap<>();
@@ -32,6 +32,10 @@ public class findData {
     private static TreeMap<String, Integer> contentMarketingPartialCount = new TreeMap<>();
     private static TreeMap<String, Integer> socialMediaPartialCount = new TreeMap<>();
     private static TreeMap<String, Integer> analyticsPartialCount = new TreeMap<>();
+
+    //Alpha
+    private static Map<ArrayList<String>, Integer> map = new HashMap<>();
+
 
 
 
@@ -175,12 +179,12 @@ public class findData {
 //
 //        System.out.println("Total full companies" + fullStackCompanies.size());
 
-        System.out.println(companyTools.toString());
+        //System.out.println(companyTools.toString());
 
     }
 
     //Alphabetical sort
-    public ArrayList<String> mergeSort(ArrayList<String> fullList) {
+    public static ArrayList<String> mergeSort(ArrayList<String> fullList) {
         ArrayList<String> left = new ArrayList<String>();
         ArrayList<String> right = new ArrayList<String>();
         int middle;
@@ -211,7 +215,7 @@ public class findData {
     }
 
     //Helper method for recursive mergeSort
-    private void merge(ArrayList<String> left, ArrayList<String> right, ArrayList<String> fullList) {
+    private static void merge(ArrayList<String> left, ArrayList<String> right, ArrayList<String> fullList) {
         int leftIndex = 0;
         int rightIndex = 0;
         int fullIndex = 0;
@@ -230,7 +234,7 @@ public class findData {
         ArrayList<String> temp;
         int tempIndex;
         if (leftIndex >= left.size()) {
-            //Left arraylist has no room
+            //Left arrayList has no room
             temp = right;
             tempIndex = rightIndex;
         } else {
@@ -254,37 +258,83 @@ public class findData {
         mergeSort(analyticsTools);
         mergeSort(partialStackCompanies);
         mergeSort(fullStackCompanies);
-
-//        System.out.println(contentMarketingTools.toString());
-//        System.out.println(emailMarketingTools.toString());
-//        System.out.println(socialMediaTools.toString());
-//        System.out.println(analyticsTools.toString());
-//        System.out.println(partialStackCompanies.toString());
-//        System.out.println(fullStackCompanies.toString());
-
+        mergeSort(companyList);
     }
+
+    public void countLengths() {
+        int temp = 0;
+        int num = 5;
+        for (Integer val : countData.keySet()) {
+            ArrayList<String> outList = countData.get(val);
+            System.out.println("Count: " + val + " is = " + outList.size());
+            System.out.println("~~~~~~~~~~~~~~~~~");
+
+            if (val >= num) temp += val;
+        }
+        System.out.println("Total of " + num + " lists is " + temp);
+    }
+
+    public void getMostCommon () {
+        for (String company : companyTools.keySet()) {
+            ArrayList<String> input = companyTools.get(company);
+            Collections.sort(companyTools.get(company));
+
+            for (Map.Entry<String, ArrayList<String>> listEntry : companyTools.entrySet()) {
+                //System.out.println(listEntry);
+                ArrayList<String> tempList = listEntry.getValue();
+                System.out.println("One entry : " + tempList);
+            }
+
+
+
+
+
+//            for (int i = 0; i < input.size(); i++) {
+//                if (map.containsKey(input)) {
+//                    map.put(input, map.get(input) + 1);
+//                } else {
+//                    map.put(input, 1);
+//                }
+//            }
+
+        }
+        //System.out.println(companyTools.toString());
+        //System.out.print(map.toString());
+    }
+
+
+
+
+
+    //
 
     //Stores all the found data into TreeMaps
 //    public void storeCount() {
 //
+//        //Counters
+//        int emailCount, contentCount, socialCount, analyticsCount, totalCount;
+//        emailCount = 0; contentCount = 0; socialCount = 0; analyticsCount = 0;
+//
 //        //Full Stack
 //        for (int i = 0; i < fullStackCompanies.size(); i++) {
-//            String company = fullStackCompanies.get(i);
-//            if (companyTools.containsKey(company)) {
-//                ArrayList<String> temp = companyTools.get(company);
+//            //Take each company tool list by alphabetical order.
+//            ArrayList<String> tempTools = companyTools.get(fullStackCompanies.get(i));
+//            mergeSort(tempTools);
 //
-//                //Iterate through each category
-//
+//            //Iteratively check if a tool used by a company is an email marketing tool.
+//            if (emailMarketingTools.contains(tempTools.get(i))) {
+//                for (int j = 0; j < emailMarketingTools.size(); j++) {
+//                    emailCount++;
+//                }
 //            }
+//
+//
 //        }
 //
 //        //Partial Stack
 //    }
-
-    //Calculates the most common full marketing stacklists
-//    public void calculateFull() {
 //
-
-//    }
+//    //Calculates the most common full marketing stacklists
+//    public void calculateFull() {}
 
 }
