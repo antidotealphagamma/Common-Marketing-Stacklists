@@ -86,7 +86,7 @@ public class FileTaker {
 
                 } else if (primaryCategory.equals("BI / Analytics")) {
                     for (int i = 0; i < analytics.size(); i++) {
-                        if (analytics.get(i).equals(tool)) duplicates++;
+                        if (analytics.get(i).equals(tool) || tool.equals("Google Analytics")) duplicates++;
                     }
                     if (duplicates == 0) analytics.add(tool);
                     duplicates = 0;
