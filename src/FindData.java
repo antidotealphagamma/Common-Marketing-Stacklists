@@ -315,13 +315,25 @@ public class FindData {
                 isSubsetB = input.containsAll(tempList);
                 if (map.containsKey(input)) {
                     //System.out.println(company);
-                    if (isSubsetA && input.size() >= n) map.put(input, map.get(input) + 1);
-                    else if (isSubsetB && tempList.size() >= n) map.put(input, map.get(input) + 1);
+                    if (isSubsetA && input.size() >= n) {
+                        System.out.println("tempList contains Input and contains key");
+                        map.put(input, map.get(input) + 1);
+                    }
+                    else if (isSubsetB && tempList.size() >= n) {
+                        System.out.println("input contains all templist and contains key");
+                        map.put(input, map.get(input) + 1);
+                    }
                     totalCount++;
                     //System.out.println("here");
                 } else {
-                    if (isSubsetA && input.size() >= n) map.put(input, 1);
-                    else if (isSubsetB && tempList.size() >= n) map.put(tempList, 1);
+                    if (isSubsetA && input.size() >= n) {
+                        System.out.println("tempList contains Input and !contains key");
+                        map.put(input, 1);
+                    }
+                    else if (isSubsetB && tempList.size() >= n) {
+                        System.out.println("input contains tempList and !contains key");
+                        map.put(tempList, 1);
+                    }
                 }
             }
         }
