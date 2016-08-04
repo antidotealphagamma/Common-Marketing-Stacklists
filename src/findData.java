@@ -6,7 +6,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 
-public class findData {
+public class FindData {
 
     /** Instance Variables **/
     private static ArrayList<String> companyList;
@@ -21,25 +21,19 @@ public class findData {
     private static ArrayList<String> fullStackCompanies = new ArrayList<>();
     private static ArrayList<String> partialStackCompanies = new ArrayList<>();
 
-    //Storage for stack count
-    private static TreeMap<String, Integer> emailMarketingFullCount = new TreeMap<>();
-    private static TreeMap<String, Integer> contentMarketingFullCount = new TreeMap<>();
-    private static TreeMap<String, Integer> socialMediaFullCount = new TreeMap<>();
-    private static TreeMap<String, Integer> analyticsFullCount = new TreeMap<>();
+    //Storage for probability mapping
+    private static Map<Float, ArrayList<String>> likelihoodMap = new TreeMap<>();
+    private static Map<Integer, ArrayList<String>> mapFinal = new TreeMap<>();
 
-    //Partial Counts
-    private static TreeMap<String, Integer> emailMarketingPartialCount = new TreeMap<>();
-    private static TreeMap<String, Integer> contentMarketingPartialCount = new TreeMap<>();
-    private static TreeMap<String, Integer> socialMediaPartialCount = new TreeMap<>();
-    private static TreeMap<String, Integer> analyticsPartialCount = new TreeMap<>();
 
     //Alpha
     private static Map<ArrayList<String>, Integer> map = new HashMap<>();
+    private static int totalCount = 0;
 
 
 
 
-    public void findData() {
+    public void FindData() {
 
         //Parse the file and take the data from comma separated values.
         FileTaker takeFile = new FileTaker();
@@ -59,17 +53,16 @@ public class findData {
 
         //Initialize the counting TreeMap with empty ArrayLists
         int initTemp = 0;
-        while (initTemp <= 20) {
+        while (initTemp <= 100) {
             countData.put(initTemp, new ArrayList<String>());
             initTemp++;
         }
-
     }
 
     public void findMatch() {
 
         //Temporary ArrayList
-        ArrayList<String> tempList = new ArrayList<String>();
+        List<String> tempList = new ArrayList<>();
 
         //Counters
         int emailCount, contentCount, socialCount, analyticsCount, totalCount;
@@ -158,7 +151,8 @@ public class findData {
             isPartialStack = false; isFullStack = false;
             email = false; social = false; content = false; analytics = false;
             emailCount = 0; socialCount = 0; contentCount = 0; analyticsCount = 0;
-            totalCount = 0;
+            //totalCount = 0;
+
         }
 
 
@@ -166,6 +160,7 @@ public class findData {
 
 
         /** Debugging **/
+        System.out.println(totalCount);
 //        System.out.println("Full stack companies: ");
 //        System.out.println(fullStackCompanies);
 //
@@ -183,10 +178,10 @@ public class findData {
 
     }
 
-    //Alphabetical sort
+    //Alphabetical sort via MergeSort algorithm
     public static ArrayList<String> mergeSort(ArrayList<String> fullList) {
-        ArrayList<String> left = new ArrayList<String>();
-        ArrayList<String> right = new ArrayList<String>();
+        ArrayList<String> left = new ArrayList<>();
+        ArrayList<String> right = new ArrayList<>();
         int middle;
 
         if (fullList.size() == 1) {
@@ -213,6 +208,7 @@ public class findData {
 
         return fullList;
     }
+
 
     //Helper method for recursive mergeSort
     private static void merge(ArrayList<String> left, ArrayList<String> right, ArrayList<String> fullList) {
@@ -261,6 +257,7 @@ public class findData {
         mergeSort(companyList);
     }
 
+
     public void countLengths() {
         int temp = 0;
         int num = 5;
@@ -274,67 +271,101 @@ public class findData {
         System.out.println("Total of " + num + " lists is " + temp);
     }
 
+    public ArrayList<String> getMatchingElements(ArrayList<String> a, ArrayList<String> b) {
+        ArrayList<String> retVal = new ArrayList<>();
+        if (a.size() >= b.size()) {
+            for (int i=0; i < a.size(); i++) {
+                for (int j=0; j < b.size(); j++) {
+                    if (a.get(i).contains(b.get(j))) retVal.add(a.get(i));
+                }
+            }
+        } else {
+            for (int i=0; i < b.size(); i++) {
+                for (int j=0; j < a.size(); j++) {
+                    if (b.get(i).contains(a.get(j))) retVal.add(b.get(i));
+                }
+            }
+        }
+        return retVal;
+    };
+
+
+
+    public double tallyTotal(Map<Integer, ArrayList<String>> input) {
+        double outVal = 0;
+        for (Integer temp : input.keySet()) {
+            outVal += temp;
+        }
+        return outVal;
+    }
+
     public void getMostCommon () {
+        //int n = 5;
+        Scanner in = new Scanner(System.in);
+        System.out.println("Enter n filter: ");
+        int n = in.nextInt();
+        boolean hasElements;
         for (String company : companyTools.keySet()) {
             ArrayList<String> input = companyTools.get(company);
             Collections.sort(companyTools.get(company));
-
+            //Iterate over each list entry in the HashMap of company tools.
             for (Map.Entry<String, ArrayList<String>> listEntry : companyTools.entrySet()) {
-                //System.out.println(listEntry);
                 ArrayList<String> tempList = listEntry.getValue();
-                System.out.println("One entry : " + tempList);
+                ArrayList<String> temp = getMatchingElements(input,tempList);
+                hasElements = (temp != null);
+                if (map.containsKey(temp)) {
+                    if (hasElements && temp.size() >= n) {
+                        map.put(temp, map.get(temp) + 1);
+                    }
+                    totalCount++;
+                } else {
+                    if (hasElements && input.size() >= n) {
+                        map.put(temp, 1);
+                    }
+                }
             }
-
-
-
-
-
-//            for (int i = 0; i < input.size(); i++) {
-//                if (map.containsKey(input)) {
-//                    map.put(input, map.get(input) + 1);
-//                } else {
-//                    map.put(input, 1);
-//                }
-//            }
-
         }
-        //System.out.println(companyTools.toString());
-        //System.out.print(map.toString());
     }
 
+    public void filter() {
+        System.out.println("Enter the minimum amount of tools to search for their most common stacklists: ");
+        Scanner in = new Scanner(System.in);
+        int temp = in.nextInt();
 
 
+        //Ordered frequency of stacklist subsets
+        for (ArrayList<String> stack : map.keySet()) {
+             mapFinal.put(map.get(stack), stack);
+        }
+
+        Iterator<Map.Entry<Integer, ArrayList<String>>> iterator = mapFinal.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, ArrayList<String>> entry = iterator.next();
+            if (temp > entry.getValue().size()) iterator.remove();
+
+        }
+
+        double divisor = tallyTotal(mapFinal);
+        //double divisor = (double)totalCount;
+        System.out.println("Union: " + divisor);
+
+        //System.out.println(mapFinal.toString());
+        for (Integer k : mapFinal.keySet()) {
+            //divisor = divisor(float);
+            double tempVal = k/divisor;
+            tempVal *= 100;
+
+            System.out.println(mapFinal.get(k));
+            System.out.printf(" ========================================================>       Likelihood is %.6f \n", tempVal);
+        }
+
+        System.out.println(mapFinal);
 
 
-    //
+    }
 
-    //Stores all the found data into TreeMaps
-//    public void storeCount() {
-//
-//        //Counters
-//        int emailCount, contentCount, socialCount, analyticsCount, totalCount;
-//        emailCount = 0; contentCount = 0; socialCount = 0; analyticsCount = 0;
-//
-//        //Full Stack
-//        for (int i = 0; i < fullStackCompanies.size(); i++) {
-//            //Take each company tool list by alphabetical order.
-//            ArrayList<String> tempTools = companyTools.get(fullStackCompanies.get(i));
-//            mergeSort(tempTools);
-//
-//            //Iteratively check if a tool used by a company is an email marketing tool.
-//            if (emailMarketingTools.contains(tempTools.get(i))) {
-//                for (int j = 0; j < emailMarketingTools.size(); j++) {
-//                    emailCount++;
-//                }
-//            }
-//
-//
-//        }
-//
-//        //Partial Stack
+//    public String toString() {
+//        return null;
 //    }
-//
-//    //Calculates the most common full marketing stacklists
-//    public void calculateFull() {}
 
 }
